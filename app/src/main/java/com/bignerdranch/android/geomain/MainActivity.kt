@@ -20,5 +20,9 @@ class MainActivity : AppCompatActivity() {
         trueButton.setOnClickListener { view: View ->
 // Что-то выполнить после нажатия
         }
+
+        falseButton.setOnClickListener { view: View ->
+// Что-то выполнить после нажатия
+        }
     }
 }
