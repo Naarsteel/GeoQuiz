@@ -1,14 +1,17 @@
 package com.bignerdranch.android.geomain
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 
 private const val TAG = "QuizViewModel"
 
 class QuizViewModel : ViewModel() {
     var currentIndex = 0
+    var correctAnswers = 0
 
-    private val questionBank = listOf(
+    val currentQuestion: Question
+        get() = questionBank[currentIndex]
+
+    val questionBank = listOf(
         Question(R.string.question_australia, true),
         Question(R.string.question_oceans, true),
         Question(R.string.question_mideast, false),
@@ -23,5 +26,13 @@ class QuizViewModel : ViewModel() {
         get() = questionBank[currentIndex].textResId
     fun moveToNext() {
         currentIndex = (currentIndex + 1) % questionBank.size
+    }
+    fun markQuestionAsAnswered() {
+        currentQuestion.isAnswered = true
+    }
+    fun resetQuiz() {
+        currentIndex = 0
+        correctAnswers = 0
+        questionBank.forEach { it.isAnswered = false }
     }
 }

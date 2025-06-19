@@ -7,8 +7,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 
 private const val TAG = "MainActivity"
 
@@ -18,16 +18,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var falseButton: Button
     private lateinit var nextButton: Button
     private lateinit var questionTextView: TextView
-    private var correctAnswers = 0
-    private var totalQuestions = 0
 
     companion object {
         private const val KEY_CURRENT_INDEX = "currentIndex"
+        private const val KEY_CORRECT_ANSWERS = "correctAnswers"
     }
 
-    private val quizViewModel: QuizViewModel by lazy {
-        ViewModelProviders.of(this).get(QuizViewModel::class.java)
-    }
+    private val quizViewModel: QuizViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,68 +36,49 @@ class MainActivity : AppCompatActivity() {
         nextButton = findViewById(R.id.next_button)
         questionTextView = findViewById(R.id.question_text_view)
 
-        trueButton.setOnClickListener { view: View ->
+        if (savedInstanceState != null) {
+            quizViewModel.currentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX, 0)
+            quizViewModel.correctAnswers = savedInstanceState.getInt(KEY_CORRECT_ANSWERS, 0)
+        }
+
+        trueButton.setOnClickListener {
             checkAnswer(true)
             hideAnswerButtons()
         }
 
-        falseButton.setOnClickListener { view: View ->
+        falseButton.setOnClickListener {
             checkAnswer(false)
             hideAnswerButtons()
         }
 
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
             showAnswerButtons()
-        }
-
-        if (savedInstanceState != null) {
-            currentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX, 0)
         }
 
         updateQuestion()
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart() called")
-    }
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume() called")
-    }
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause() called")
-    }
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop() called")
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy() called")
-    }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(KEY_CURRENT_INDEX, currentIndex)
+        outState.putInt(KEY_CURRENT_INDEX, quizViewModel.currentIndex)
+        outState.putInt(KEY_CORRECT_ANSWERS, quizViewModel.correctAnswers)
     }
 
     private fun updateQuestion() {
-        val questionTextResId = questionBank[currentIndex].textResId
-        questionTextView.setText(questionTextResId)
+        questionTextView.setText(quizViewModel.currentQuestionText)
 
-        if (!questionBank[currentIndex].isAnswered) {
-            showAnswerButtons()
-        } else {
+        if (quizViewModel.currentQuestion.isAnswered) {
             hideAnswerButtons()
+        } else {
+            showAnswerButtons()
         }
 
-        if (currentIndex < questionBank.size - 1) {
+        if (quizViewModel.currentIndex < quizViewModel.questionBank.size - 1) {
             enableNextButton()
         } else {
-            if (!questionBank[currentIndex].isAnswered) {
+            if (!quizViewModel.currentQuestion.isAnswered) {
                 enableNextButton()
             } else {
                 disableNextButton()
@@ -109,29 +87,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        questionBank[currentIndex].isAnswered = true
-        val correctAnswer = questionBank[currentIndex].answer
-        val messageResId = if (userAnswer == correctAnswer) {
-            correctAnswers++
+        quizViewModel.markQuestionAsAnswered()  // Помечаем вопрос как отвеченный
+
+        val isCorrect = userAnswer == quizViewModel.currentQuestionAnswer
+        val messageResId = if (isCorrect) {
+            quizViewModel.correctAnswers++
             R.string.correct_toast
         } else {
             R.string.incorrect_toast
         }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
-            .show()
 
-        questionBank[currentIndex].isAnswered = true
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
         hideAnswerButtons()
 
-        if (currentIndex == questionBank.size - 1) {
+        if (quizViewModel.currentIndex == quizViewModel.questionBank.size - 1) {
             disableNextButton()
             showResult()
         }
     }
 
     private fun showResult() {
-        totalQuestions = questionBank.size
-        val resultMessage = getString(R.string.result_message, correctAnswers, totalQuestions)
+        val totalQuestions = quizViewModel.questionBank.size
+        val resultMessage = getString(
+            R.string.result_message,
+            quizViewModel.correctAnswers,
+            totalQuestions
+        )
 
         AlertDialog.Builder(this)
             .setTitle(R.string.results_title)
@@ -144,10 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restartQuiz() {
-        currentIndex = 0
-        correctAnswers = 0
-        questionBank.forEach { it.isAnswered = false }
-
+        quizViewModel.resetQuiz()
         updateQuestion()
         showAnswerButtons()
         enableNextButton()
@@ -172,10 +150,4 @@ class MainActivity : AppCompatActivity() {
         trueButton.visibility = View.VISIBLE
         falseButton.visibility = View.VISIBLE
     }
-
-    data class Question(
-        val textResId: Int,
-        val answer: Boolean,
-        var isAnswered: Boolean = false
-    )
 }
