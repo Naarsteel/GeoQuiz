@@ -11,4 +11,7 @@
     <string name="next_button">Next</string>
     <string name="correct_toast">Correct!</string>
     <string name="incorrect_toast">Incorrect!</string>
+    <string name="results_title">Результаты викторины</string>
+    <string name="result_message">Правильных ответов: %1$d из %2$d</string>
+    <string name="restart_quiz">Начать заново</string>
 </resources>

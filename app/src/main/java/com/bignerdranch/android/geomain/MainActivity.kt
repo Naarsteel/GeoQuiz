@@ -1,5 +1,6 @@
 package com.bignerdranch.android.geomain
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,6 +17,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var falseButton: Button
     private lateinit var nextButton: Button
     private lateinit var questionTextView: TextView
+    private var correctAnswers = 0
+    private var totalQuestions = 0
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
@@ -91,6 +94,13 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         questionTextView.setText(questionTextResId)
+
+        if (!questionBank[currentIndex].isAnswered) {
+            showAnswerButtons()
+        } else {
+            hideAnswerButtons()
+        }
+
         if (currentIndex < questionBank.size - 1) {
             enableNextButton()
         } else {
@@ -106,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         questionBank[currentIndex].isAnswered = true
         val correctAnswer = questionBank[currentIndex].answer
         val messageResId = if (userAnswer == correctAnswer) {
+            correctAnswers++
             R.string.correct_toast
         } else {
             R.string.incorrect_toast
@@ -113,9 +124,37 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
             .show()
 
+        questionBank[currentIndex].isAnswered = true
+        hideAnswerButtons()
+
         if (currentIndex == questionBank.size - 1) {
             disableNextButton()
+            showResult()
         }
+    }
+
+    private fun showResult() {
+        totalQuestions = questionBank.size
+        val resultMessage = getString(R.string.result_message, correctAnswers, totalQuestions)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.results_title)
+            .setMessage(resultMessage)
+            .setPositiveButton(R.string.restart_quiz) { _, _ ->
+                restartQuiz()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun restartQuiz() {
+        currentIndex = 0
+        correctAnswers = 0
+        questionBank.forEach { it.isAnswered = false }
+
+        updateQuestion()
+        showAnswerButtons()
+        enableNextButton()
     }
 
     private fun disableNextButton() {
