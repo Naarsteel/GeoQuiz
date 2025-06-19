@@ -91,9 +91,19 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         questionTextView.setText(questionTextResId)
+        if (currentIndex < questionBank.size - 1) {
+            enableNextButton()
+        } else {
+            if (!questionBank[currentIndex].isAnswered) {
+                enableNextButton()
+            } else {
+                disableNextButton()
+            }
+        }
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
+        questionBank[currentIndex].isAnswered = true
         val correctAnswer = questionBank[currentIndex].answer
         val messageResId = if (userAnswer == correctAnswer) {
             R.string.correct_toast
@@ -102,10 +112,24 @@ class MainActivity : AppCompatActivity() {
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
             .show()
+
+        if (currentIndex == questionBank.size - 1) {
+            disableNextButton()
+        }
+    }
+
+    private fun disableNextButton() {
+        nextButton.isEnabled = false
+        nextButton.visibility = View.INVISIBLE
+    }
+
+    private fun enableNextButton() {
+        nextButton.isEnabled = true
+        nextButton.visibility = View.VISIBLE
     }
 
     private fun hideAnswerButtons() {
-        trueButton.visibility = View.INVISIBLE // или View.GONE
+        trueButton.visibility = View.INVISIBLE
         falseButton.visibility = View.INVISIBLE
     }
 
@@ -113,4 +137,10 @@ class MainActivity : AppCompatActivity() {
         trueButton.visibility = View.VISIBLE
         falseButton.visibility = View.VISIBLE
     }
+
+    data class Question(
+        val textResId: Int,
+        val answer: Boolean,
+        var isAnswered: Boolean = false
+    )
 }
