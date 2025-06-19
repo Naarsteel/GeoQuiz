@@ -42,15 +42,18 @@ class MainActivity : AppCompatActivity() {
 
         trueButton.setOnClickListener { view: View ->
             checkAnswer(true)
+            hideAnswerButtons()
         }
 
         falseButton.setOnClickListener { view: View ->
             checkAnswer(false)
+            hideAnswerButtons()
         }
 
         nextButton.setOnClickListener {
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
+            showAnswerButtons()
         }
 
         if (savedInstanceState != null) {
@@ -99,5 +102,15 @@ class MainActivity : AppCompatActivity() {
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
             .show()
+    }
+
+    private fun hideAnswerButtons() {
+        trueButton.visibility = View.INVISIBLE // или View.GONE
+        falseButton.visibility = View.INVISIBLE
+    }
+
+    private fun showAnswerButtons() {
+        trueButton.visibility = View.VISIBLE
+        falseButton.visibility = View.VISIBLE
     }
 }
