@@ -26,6 +26,10 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_asia, true))
     private var currentIndex = 0
 
+    companion object {
+        private const val KEY_CURRENT_INDEX = "currentIndex"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
@@ -47,6 +51,10 @@ class MainActivity : AppCompatActivity() {
         nextButton.setOnClickListener {
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
+        }
+
+        if (savedInstanceState != null) {
+            currentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX, 0)
         }
 
         updateQuestion()
@@ -71,6 +79,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy() called")
+    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_CURRENT_INDEX, currentIndex)
     }
 
     private fun updateQuestion() {
