@@ -63,9 +63,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         cheatButton.setOnClickListener {
-            val answerIsTrue = quizViewModel.currentQuestionAnswer
-            val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue)
-            startActivityForResult(intent, REQUEST_CODE_CHEAT)
+            if (quizViewModel.cheatsRemaining > 0) {
+                val answerIsTrue = quizViewModel.currentQuestionAnswer
+                val intent = CheatActivity.newIntent(
+                    this@MainActivity,
+                    answerIsTrue,
+                    quizViewModel.cheatsRemaining
+                )
+                startActivityForResult(intent, REQUEST_CODE_CHEAT)
+            } else {
+                Toast.makeText(this, R.string.no_more_cheats_toast, Toast.LENGTH_SHORT).show()
+                quizViewModel.isCheater = true
+            }
         }
 
         updateQuestion()
@@ -79,8 +88,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (requestCode == REQUEST_CODE_CHEAT) {
-            quizViewModel.isCheater =
-                data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+            val answerWasShown = data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+            if (answerWasShown) {
+                quizViewModel.useCheat()
+            }
         }
     }
 
@@ -111,11 +122,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        quizViewModel.markQuestionAsAnswered()  // Помечаем вопрос как отвеченный
+        quizViewModel.markQuestionAsAnswered()
 
         val isCorrect = userAnswer == quizViewModel.currentQuestionAnswer
         val messageResId = when {
-            quizViewModel.isCheater -> R.string.judgment_toast
+            quizViewModel.isCurrentQuestionCheated() -> R.string.judgment_toast
             isCorrect -> {
                 quizViewModel.correctAnswers++
                 R.string.correct_toast

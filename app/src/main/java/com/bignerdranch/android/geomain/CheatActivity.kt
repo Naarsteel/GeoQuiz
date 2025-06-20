@@ -27,6 +27,11 @@ class CheatActivity : AppCompatActivity() {
         answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
         answerTextView = findViewById(R.id.answer_text_view)
         showAnswerButton = findViewById(R.id.show_answer_button)
+
+        val cheatsRemainingTextView = findViewById<TextView>(R.id.cheats_remaining_text_view)
+        val cheatsRemaining = intent.getIntExtra(EXTRA_CHEATS_REMAINING, 0)
+        cheatsRemainingTextView.text = getString(R.string.cheats_remaining, cheatsRemaining)
+
         showAnswerButton.setOnClickListener {
             val answerText = when {
                 answerIsTrue -> R.string.true_button
@@ -34,6 +39,7 @@ class CheatActivity : AppCompatActivity() {
             }
             answerTextView.setText(answerText)
             setAnswerShownResult(true)
+            showAnswerButton.isEnabled = false
         }
     }
 
@@ -45,9 +51,17 @@ class CheatActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun newIntent(packageContext: Context, answerIsTrue: Boolean): Intent {
+        private const val EXTRA_CHEATS_REMAINING =
+            "com.bignerdranch.android.geomain.cheats_remaining"
+
+        fun newIntent(
+            packageContext: Context,
+            answerIsTrue: Boolean,
+            cheatsRemaining: Int
+        ): Intent {
             return Intent(packageContext, CheatActivity::class.java).apply {
                 putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue)
+                putExtra(EXTRA_CHEATS_REMAINING, cheatsRemaining)
             }
         }
     }
