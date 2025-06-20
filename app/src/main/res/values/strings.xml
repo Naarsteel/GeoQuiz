@@ -17,6 +17,7 @@
     <string name="judgment_toast">Cheating is wrong.</string>
     <string name="no_more_cheats_toast">No more cheats remaining!</string>
     <string name="cheats_remaining">Cheats remaining: %d</string>
+    <string name="api_level">API Level: %d</string>
     <string name="results_title">Результаты викторины</string>
     <string name="result_message">Правильных ответов: %1$d из %2$d</string>
     <string name="restart_quiz">Начать заново</string>

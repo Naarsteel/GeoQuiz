@@ -3,6 +3,7 @@ package com.bignerdranch.android.geomain
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -17,6 +18,7 @@ class CheatActivity : AppCompatActivity() {
 
     private lateinit var answerTextView: TextView
     private lateinit var showAnswerButton: Button
+    private lateinit var apiLevelTextView: TextView
     private var answerIsTrue = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,12 +26,16 @@ class CheatActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_cheat)
 
-        answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
         answerTextView = findViewById(R.id.answer_text_view)
         showAnswerButton = findViewById(R.id.show_answer_button)
+        apiLevelTextView = findViewById(R.id.api_level_text_view)
+
+        answerIsTrue = intent.getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false)
+        val cheatsRemaining = intent.getIntExtra(EXTRA_CHEATS_REMAINING, 0)
+
+        apiLevelTextView.text = getString(R.string.api_level, Build.VERSION.SDK_INT)
 
         val cheatsRemainingTextView = findViewById<TextView>(R.id.cheats_remaining_text_view)
-        val cheatsRemaining = intent.getIntExtra(EXTRA_CHEATS_REMAINING, 0)
         cheatsRemainingTextView.text = getString(R.string.cheats_remaining, cheatsRemaining)
 
         showAnswerButton.setOnClickListener {
