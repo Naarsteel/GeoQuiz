@@ -114,11 +114,13 @@ class MainActivity : AppCompatActivity() {
         quizViewModel.markQuestionAsAnswered()  // Помечаем вопрос как отвеченный
 
         val isCorrect = userAnswer == quizViewModel.currentQuestionAnswer
-        val messageResId = if (isCorrect) {
-            quizViewModel.correctAnswers++
-            R.string.correct_toast
-        } else {
-            R.string.incorrect_toast
+        val messageResId = when {
+            quizViewModel.isCheater -> R.string.judgment_toast
+            isCorrect -> {
+                quizViewModel.correctAnswers++
+                R.string.correct_toast
+            }
+            else -> R.string.incorrect_toast
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
