@@ -7,6 +7,7 @@ private const val TAG = "QuizViewModel"
 class QuizViewModel : ViewModel() {
     var currentIndex = 0
     var correctAnswers = 0
+    var isCheater = false
 
     val currentQuestion: Question
         get() = questionBank[currentIndex]
