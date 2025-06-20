@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 
 private const val TAG = "MainActivity"
+private const val REQUEST_CODE_CHEAT = 0
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         cheatButton.setOnClickListener {
             val answerIsTrue = quizViewModel.currentQuestionAnswer
             val intent = CheatActivity.newIntent(this@MainActivity, answerIsTrue)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_CHEAT)
         }
 
         updateQuestion()
